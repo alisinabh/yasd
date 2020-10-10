@@ -7,6 +7,7 @@ defmodule YASD.Application do
 
   def start(_type, _args) do
     port = String.to_integer(System.get_env("PORT") || "4001")
+    :ok = YASD.Config.load()
 
     children = [
       # Starts a worker by calling: YASD.Worker.start_link(arg)

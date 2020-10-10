@@ -5,15 +5,13 @@ defmodule YASD.Registry do
 
   use GenServer
 
-  require Logger
+  import YASD.Config
 
-  # 2 minutes
-  @janitor_sweep_interval 30 * 1000
-  # 90 seconds
-  @heartbeat_tollerance 90
+  require Logger
 
   @doc false
   def start_link(_opts) do
+    Logger.info("Starting #{__MODULE__}")
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
@@ -125,7 +123,7 @@ defmodule YASD.Registry do
       |> Enum.reduce(%{}, fn {service, nodes}, acc_services ->
         nodes =
           Enum.reduce(nodes, %{}, fn {ip, data}, acc ->
-            if System.system_time() - data.last_heartbeat > @heartbeat_tollerance do
+            if System.system_time() - data.last_heartbeat > get_heartbeat_timeout() do
               Logger.info("[registery] #{service} => #{ip} has timed-out and removed")
               acc
             else
@@ -142,6 +140,6 @@ defmodule YASD.Registry do
   end
 
   defp schedule_next_janitor do
-    Process.send_after(self(), :run_janitor, @janitor_sweep_interval)
+    Process.send_after(self(), :run_janitor, get_janitor_sweep_interval() * 1000)
   end
 end

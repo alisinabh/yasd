@@ -10,7 +10,7 @@ defmodule YASD.Router do
     use Plug.Debugger
   end
 
-  alias YASD.Utils
+  alias YASD.{Registry, Utils}
 
   plug(Plug.RequestId)
   plug(Plug.Logger)
@@ -23,7 +23,7 @@ defmodule YASD.Router do
   end
 
   get "/api/v1/services" do
-    with {:ok, services} <- YASD.Registry.list_services() do
+    with {:ok, services} <- Registry.list_services() do
       Utils.send_json(conn, services)
     else
       {:error, error} ->
@@ -35,7 +35,7 @@ defmodule YASD.Router do
     conn = fetch_query_params(conn)
     service = conn.params["service_name"]
 
-    with {:ok, nodes} <- YASD.Registry.list_nodes(service, conn.params["tags"] || []) do
+    with {:ok, nodes} <- Registry.list_nodes(service, conn.params["tags"] || []) do
       Utils.send_json(conn, nodes)
     else
       {:error, error} ->
@@ -49,7 +49,7 @@ defmodule YASD.Router do
     ip = conn.params["ip"]
     tags = conn.params["tags"] || []
 
-    with :ok <- YASD.Registry.register(service_name, ip, tags) do
+    with :ok <- Registry.register(service_name, ip, tags) do
       send_resp(conn, 204, "")
     else
       {:error, error} ->
