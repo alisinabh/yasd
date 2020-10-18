@@ -17,7 +17,7 @@ defmodule YASD.Config do
     Application.put_env(
       :yasd,
       :heartbeat_timeout,
-      System.get_env("HEARTBEAT_TIMEOUT") || 90
+      System.get_env("HEARTBEAT_TIMEOUT") || 120
     )
   end
 
